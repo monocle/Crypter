@@ -7,7 +7,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-   CREATE USER crypter_user WITH PASSWORD 'CHANGE_ME';
+   CREATE USER crypter_user WITH PASSWORD 'DEFAULT_PASSWORD';
    REVOKE ALL PRIVILEGES ON DATABASE postgres FROM crypter_user;
    REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_user;
    REVOKE CREATE ON SCHEMA public FROM PUBLIC;
@@ -22,7 +22,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "crypter" <<-EOSQL
 EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "crypter_hangfire" <<-EOSQL
-   CREATE USER crypter_hangfire_user WITH PASSWORD 'CHANGE_ME';
+   CREATE USER crypter_hangfire_user WITH PASSWORD 'DEFAULT_PASSWORD';
    REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
    REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_hangfire_user;
 

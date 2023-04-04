@@ -2,7 +2,7 @@ name: Build and Test
 
 on:
   pull_request:
-    branches: [ main, dev, stable ]
+    branches: [ main, stable ]
 
 jobs:
   build-and-test:
@@ -13,7 +13,7 @@ jobs:
       postgres-crypter:
         image: postgres
         env:
-          POSTGRES_PASSWORD: UNIT_TESTING_PASSWORD
+          POSTGRES_PASSWORD: DEFAULT_PASSWORD
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -25,7 +25,7 @@ jobs:
       postgres-hangfire:
         image: postgres
         env:
-          POSTGRES_PASSWORD: UNIT_TESTING_PASSWORD
+          POSTGRES_PASSWORD: DEFAULT_PASSWORD
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -50,17 +50,39 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
 
-    - name: Migrate Crypter database
+    - name: Create Crypter database
       run: |
          dotnet tool install --global dotnet-ef
          dotnet tool restore
-         dotnet ef database update -c DataContext -p Crypter.Core -s Crypter.API --connection "host=127.0.0.1:5432;database=crypter_test;user id=postgres;pwd=UNIT_TESTING_PASSWORD;"
+         dotnet ef database update -c DataContext -p Crypter.Core -s Crypter.API --connection "host=127.0.0.1:5432;database=crypter;user id=postgres;pwd=DEFAULT_PASSWORD;"
+         export PGPASSWORD=DEFAULT_PASSWORD
+         psql -h 127.0.0.1 -U postgres <<-EOSQL
+            CREATE USER crypter_user WITH PASSWORD 'DEFAULT_PASSWORD';
+            REVOKE ALL PRIVILEGES ON DATABASE postgres FROM crypter_user;
+            REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_user;
+            REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+         EOSQL
+         psql -h 127.0.0.1 -U postgres --dbname "crypter" <<-EOSQL
+            REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_user;
+            REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_user;
+            REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+            GRANT CONNECT ON DATABASE crypter TO crypter_user;
+            ALTER DEFAULT PRIVILEGES FOR USER postgres IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO crypter_user;
+         EOSQL
 
     - name: Create Hangfire database
       run: |
           sudo apt-get install --yes --no-install-recommends postgresql-client
-          export PGPASSWORD=UNIT_TESTING_PASSWORD
-          psql -h 127.0.0.1 -U postgres -c 'CREATE DATABASE crypter_hangfire_test;'
+          export PGPASSWORD=DEFAULT_PASSWORD
+          psql -h 127.0.0.1 -U postgres <<-EOSQL
+            CREATE DATABASE crypter_hangfire;
+            CREATE USER crypter_hangfire_user WITH PASSWORD 'DEFAULT_PASSWORD';
+            REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
+            REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_hangfire_user;
+
+            CREATE SCHEMA IF NOT EXISTS Hangfire AUTHORIZATION crypter_hangfire_user;
+            GRANT CREATE ON schema Hangfire TO crypter_hangfire_user;
+          EOSQL
 
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
