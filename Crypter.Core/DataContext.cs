@@ -64,6 +64,7 @@ namespace Crypter.Core
       protected override void OnModelCreating(ModelBuilder builder)
       {
          builder.HasPostgresExtension("citext");
+         builder.HasDefaultSchema("crypter");
          builder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
       }
    }

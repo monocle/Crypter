@@ -62,8 +62,8 @@ jobs:
             REVOKE ALL PRIVILEGES ON DATABASE postgres FROM crypter_user;
             REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_user;
 
-            CREATE SCHEMA IF NOT EXISTS Crypter AUTHORIZATION crypter_user;
-            GRANT CREATE ON schema Crypter TO crypter_user;
+            CREATE SCHEMA IF NOT EXISTS crypter AUTHORIZATION crypter_user;
+            GRANT CREATE ON schema crypter TO crypter_user;
          EOSQL
 
          dotnet tool install --global dotnet-ef
@@ -81,8 +81,8 @@ jobs:
             REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
             REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_hangfire_user;
 
-            CREATE SCHEMA IF NOT EXISTS Hangfire AUTHORIZATION crypter_hangfire_user;
-            GRANT CREATE ON schema Hangfire TO crypter_hangfire_user;
+            CREATE SCHEMA IF NOT EXISTS hangfire AUTHORIZATION crypter_hangfire_user;
+            GRANT CREATE ON schema hangfire TO crypter_hangfire_user;
           EOSQL
 
     - name: Test
