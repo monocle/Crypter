@@ -71,6 +71,7 @@ jobs:
 
             GRANT CONNECT ON DATABASE crypter TO crypter_user;
             CREATE SCHEMA IF NOT EXISTS crypter AUTHORIZATION crypter_user;
+            GRANT CREATE ON SCHEMA public TO crypter_user;
             GRANT CREATE ON SCHEMA crypter TO crypter_user;
             GRANT USAGE ON SCHEMA public TO crypter_user;
             GRANT USAGE ON SCHEMA crypter TO crypter_user;
