@@ -19,20 +19,21 @@ services:
          - "C:\\CrypterFiles:/mnt/crypter_files"
 
    windows-db:
-      env_file: ./Containers/PostgreSQL/.env
-      image: postgres:14.2
-      volumes:
-         - ./Containers/PostgreSQL/postgres-init-files:/docker-entrypoint-initdb.d
-         - ./Containers/PostgreSQL/postgres-data:/var/lib/postgresql/data
-      restart: unless-stopped
       environment:
          POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
          POSTGRES_HOST_AUTH_METHOD: scram-sha-256
          POSTGRES_USER: postgres
          POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?err}
          POSTGRES_DB: postgres
+      image: postgres:14.2
       ports:
          - 127.0.0.1:5432:5432
+      profiles:
+         - windows_database
+      restart: unless-stopped
+      volumes:
+         - ./Containers/PostgreSQL/postgres-init-files:/docker-entrypoint-initdb.d
+         - ./Containers/PostgreSQL/postgres-data:/var/lib/postgresql/data
 
    linux-api:
       build:
@@ -48,24 +49,24 @@ services:
          - /mnt/crypter_files:/mnt/crypter_files
 
    linux-db:
-      container_name: postgres
-      image: postgres:14.2
-      volumes:
-         - "./postgres-init-files:/docker-entrypoint-initdb.d"
-         - "${POSTGRES_DATA_DIR:?err}:/var/lib/postgresql/data"
-      restart: unless-stopped
       environment:
          POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
          POSTGRES_HOST_AUTH_METHOD: scram-sha-256
          POSTGRES_USER: postgres
          POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?err}
          POSTGRES_DB: postgres
+      image: postgres:14.2
       ports:
          - 127.0.0.1:5432:5432
          - ${CONTAINER_LISTEN_IP:?err}:5432:5432
       profiles:
          - linux_database_server
+      restart: unless-stopped
+      volumes:
+         - "./postgres-init-files:/docker-entrypoint-initdb.d"
+         - "${POSTGRES_DATA_DIR:?err}:/var/lib/postgresql/data"
 
 # docker-compose --profile windows_development up -d
+# docker-compose --profile windows_database up -d
 # docker-compose --profile linux_web_server up -d
 # docker-compose --profile linux_database_server up -d

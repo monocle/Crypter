@@ -10,10 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres-crypter:
+      db:
         image: postgres
         env:
+          POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
+          POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: DEFAULT_PASSWORD
+          POSTGRES_DB: crypter
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -21,18 +25,6 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
-      postgres-hangfire:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: DEFAULT_PASSWORD
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5433:5432
 
     steps:
     - uses: actions/checkout@v3
@@ -50,20 +42,16 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
 
-    - name: Create databases
+    - name: Create Hangfire databases
       run: |
          sudo apt-get install --yes --no-install-recommends postgresql-client
          export PGPASSWORD=DEFAULT_PASSWORD
          psql -h 127.0.0.1 -U postgres <<-EOSQL
-            CREATE DATABASE crypter;
             CREATE DATABASE crypter_hangfire;
          EOSQL
 
-    - name: Setup Crypter database
+    - name: Create crypter_user database user
       run: |
-         sudo apt-get install --yes --no-install-recommends postgresql-client
-         export PGPASSWORD=DEFAULT_PASSWORD
-
          psql -h 127.0.0.1 -U postgres --dbname "crypter" <<-EOSQL
             CREATE USER crypter_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
@@ -78,15 +66,9 @@ jobs:
             GRANT USAGE ON SCHEMA crypter TO crypter_user;
          EOSQL
 
-         dotnet tool install --global dotnet-ef
-         dotnet tool restore
-         dotnet ef database update -c DataContext -p Crypter.Core -s Crypter.API --connection "host=127.0.0.1:5432;database=crypter;user id=crypter_user;pwd=DEFAULT_PASSWORD;"
-
-    - name: Setup Hangfire database
+    - name: Create crypter_hangfire_user database user
       run: |
-          sudo apt-get install --yes --no-install-recommends postgresql-client
-          export PGPASSWORD=DEFAULT_PASSWORD
-          psql -h 127.0.0.1 -U postgres --dbname "crypter_hangfire" <<-EOSQL
+         psql -h 127.0.0.1 -U postgres --dbname "crypter_hangfire" <<-EOSQL
             CREATE USER crypter_hangfire_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
             REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
@@ -98,7 +80,13 @@ jobs:
             GRANT CREATE ON SCHEMA hangfire TO crypter_hangfire_user;
             GRANT USAGE ON SCHEMA public TO crypter_hangfire_user;
             GRANT USAGE ON SCHEMA hangfire TO crypter_hangfire_user;
-          EOSQL
+         EOSQL
+
+    - name: Migrate Crypter database
+      run: |
+         dotnet tool install --global dotnet-ef
+         dotnet tool restore
+         dotnet ef database update -c DataContext -p Crypter.Core -s Crypter.API --connection "host=127.0.0.1:5432;database=crypter;user id=crypter_user;pwd=DEFAULT_PASSWORD;"
 
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
