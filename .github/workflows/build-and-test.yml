@@ -59,6 +59,7 @@ jobs:
             CREATE DATABASE crypter;
             CREATE USER crypter_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
+            GRANT CONNECT ON DATABASE crypter TO crypter_user;
             REVOKE ALL PRIVILEGES ON DATABASE postgres FROM crypter_user;
             REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_user;
 
@@ -78,6 +79,7 @@ jobs:
             CREATE DATABASE crypter_hangfire;
             CREATE USER crypter_hangfire_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
+            GRANT CONNECT ON DATABASE crypter_hangfire TO crypter_hangfire_user;
             REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
             REVOKE ALL PRIVILEGES ON SCHEMA public FROM crypter_hangfire_user;
 
