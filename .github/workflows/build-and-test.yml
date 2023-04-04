@@ -68,6 +68,7 @@ jobs:
             CREATE USER crypter_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
             GRANT CONNECT ON DATABASE crypter TO crypter_user;
+            GRANT USAGE ON SCHEMA public TO crypter_user;
             REVOKE ALL PRIVILEGES ON DATABASE crypter_hangfire FROM crypter_user;
 
             CREATE SCHEMA IF NOT EXISTS crypter AUTHORIZATION crypter_user;
@@ -87,6 +88,7 @@ jobs:
             CREATE USER crypter_hangfire_user WITH PASSWORD 'DEFAULT_PASSWORD';
 
             GRANT CONNECT ON DATABASE crypter_hangfire TO crypter_hangfire_user;
+            GRANT USAGE ON SCHEMA public TO crypter_hangfire_user;
             REVOKE ALL PRIVILEGES ON DATABASE crypter FROM crypter_hangfire_user;
 
             CREATE SCHEMA IF NOT EXISTS hangfire AUTHORIZATION crypter_hangfire_user;
