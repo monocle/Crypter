@@ -51,7 +51,7 @@ namespace Crypter.Test.Core_Tests
       public void Reset()
       {
          List<string> tableNames = Model.GetEntityTypes()
-          .Select(x => $" public.\"{x.GetTableName()}\"")
+          .Select(x => $" {DataContext.SchemaName}.\"{x.GetTableName()}\"")
           .Distinct()
           .ToList();
 
