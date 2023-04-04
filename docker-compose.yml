@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+   api:
+      build:
+         context: .
+         dockerfile: Crypter.API.Dockerfile
+      ports:
+         - 8000:80
+      restart: always
+      volumes: 
+         - ./Crypter.API/appsettings.json:/app/appsettings.json
+         - "C:\\CrypterFiles:/mnt/crypter_files"
