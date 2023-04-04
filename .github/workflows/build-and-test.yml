@@ -71,6 +71,7 @@ jobs:
 
             GRANT CONNECT ON DATABASE crypter TO crypter_user;
             CREATE SCHEMA IF NOT EXISTS crypter AUTHORIZATION crypter_user;
+            GRANT CREATE ON DATABASE crypter TO crypter_user;
             GRANT CREATE ON SCHEMA public TO crypter_user;
             GRANT CREATE ON SCHEMA crypter TO crypter_user;
             GRANT USAGE ON SCHEMA public TO crypter_user;
@@ -92,6 +93,8 @@ jobs:
 
             GRANT CONNECT ON DATABASE crypter_hangfire TO crypter_hangfire_user;
             CREATE SCHEMA IF NOT EXISTS hangfire AUTHORIZATION crypter_hangfire_user;
+            GREANT CREATE ON DATABASE crypter_hangfire TO crypter_hangfire_user;
+            GRANT CREATE ON SCHEMA public TO crypter_hangfire_user;
             GRANT CREATE ON SCHEMA hangfire TO crypter_hangfire_user;
             GRANT USAGE ON SCHEMA public TO crypter_hangfire_user;
             GRANT USAGE ON SCHEMA hangfire TO crypter_hangfire_user;
