@@ -65,6 +65,7 @@ jobs:
 
             CREATE SCHEMA IF NOT EXISTS crypter AUTHORIZATION crypter_user;
             GRANT CREATE ON schema crypter TO crypter_user;
+            GRANT USAGE ON SCHEMA crypter TO crypter_user;
          EOSQL
 
          dotnet tool install --global dotnet-ef
@@ -85,6 +86,7 @@ jobs:
 
             CREATE SCHEMA IF NOT EXISTS hangfire AUTHORIZATION crypter_hangfire_user;
             GRANT CREATE ON schema hangfire TO crypter_hangfire_user;
+            GRANT USAGE ON SCHEMA hangfire TO crypter_hangfire_user;
           EOSQL
 
     - name: Test
